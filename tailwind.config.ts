@@ -1,18 +1,111 @@
-import type { Config } from "tailwindcss";
+import { dynamicIconsPlugin, iconsPlugin } from '@egoist/tailwindcss-icons'
+import type { Config } from 'tailwindcss'
+import colors from 'tailwindcss/colors'
+import { fontFamily } from 'tailwindcss/defaultTheme'
 
-export default {
+const config = {
+  darkMode: ['class'],
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './lib/**/*.{js,ts,jsx,tsx}',
+    './node_modules/penx-theme-minimal/src/**/*.{js,tsx,ts}',
+    './node_modules/penx-theme-micro/src/**/*.{js,tsx,ts}',
+    './node_modules/penx-theme-card/src/**/*.{js,tsx,ts}',
+    './node_modules/penx-theme-photo/src/**/*.{js,tsx,ts}',
+    './node_modules/penx-theme-garden/src/**/*.{js,tsx,ts}',
+    './src/**/*.{ts,tsx}',
   ],
+  prefix: '',
   theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1120px',
+        '2xl': '1120px',
+      },
+    },
     extend: {
+      fontFamily: {
+        default: ['var(--font-inter)', ...fontFamily.sans],
+        cal: ['var(--font-cal)', ...fontFamily.sans],
+        title: ['var(--font-title)', ...fontFamily.sans],
+        mono: ['Consolas', ...fontFamily.mono],
+        sans: ['var(--font-sans)', ...fontFamily.sans],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        // brand: process.env.BRAND_COLOR ? colors.green : colors.pink,
+        brand: colors.pink,
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+      keyframes: {
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
       },
     },
   },
-  plugins: [],
-} satisfies Config;
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/typography'),
+    iconsPlugin(),
+    dynamicIconsPlugin(),
+  ],
+} satisfies Config
+
+export default config

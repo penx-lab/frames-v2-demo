@@ -175,7 +175,7 @@ We'll configure our client with Base as a connected network and use the `frameCo
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { base } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { frameConnector } from "~/lib/connector";
+import { frameConnector } from "@/lib/connector";
 
 export const config = createConfig({
   chains: [base],
@@ -206,7 +206,7 @@ Create `app/providers.tsx`:
 import dynamic from "next/dynamic";
 
 const WagmiProvider = dynamic(
-  () => import("~/components/providers/WagmiProvider"),
+  () => import("@/components/providers/WagmiProvider"),
   {
     ssr: false,
   }
@@ -224,8 +224,8 @@ Finally, let's add this providers component to our app layout. Edit `app/layout.
 ```tsx
 import type { Metadata } from "next";
 
-import "~/app/globals.css";
-import { Providers } from "~/app/providers";
+import "@/app/globals.css";
+import { Providers } from "@/app/providers";
 
 export const metadata: Metadata = {
   title: "Farcaster Frames v2 Demo",
@@ -272,7 +272,7 @@ Since we're going to import the frames SDK in this component, we'll need to load
 
 import dynamic from "next/dynamic";
 
-const Demo = dynamic(() => import("~/components/Demo"), {
+const Demo = dynamic(() => import("@/components/Demo"), {
   ssr: false,
 });
 
@@ -622,7 +622,7 @@ import { useEffect, useCallback, useState } from "react";
 import sdk, { type FrameContext } from "@farcaster/frame-sdk";
 import { useAccount } from "wagmi";
 
-import { Button } from "~/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 
 export default function Demo() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
@@ -674,8 +674,8 @@ import { useEffect, useCallback, useState } from "react";
 import sdk, { type FrameContext } from "@farcaster/frame-sdk";
 import { useAccount } from "wagmi";
 
-import { config } from "~/components/providers/WagmiProvider";
-import { Button } from "~/components/ui/Button";
+import { config } from "@/components/providers/WagmiProvider";
+import { Button } from "@/components/ui/Button";
 
 export default function Demo() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
@@ -751,8 +751,8 @@ import {
   useConnect,
 } from "wagmi";
 
-import { config } from "~/components/providers/WagmiProvider";
-import { Button } from "~/components/ui/Button";
+import { config } from "@/components/providers/WagmiProvider";
+import { Button } from "@/components/ui/Button";
 
 export default function Demo() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
@@ -892,9 +892,9 @@ import {
   useConnect,
 } from "wagmi";
 
-import { config } from "~/components/providers/WagmiProvider";
-import { Button } from "~/components/ui/Button";
-import { truncateAddress } from "~/lib/truncateAddress";
+import { config } from "@/components/providers/WagmiProvider";
+import { Button } from "@/components/ui/Button";
+import { truncateAddress } from "@/lib/truncateAddress";
 
 export default function Demo() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);

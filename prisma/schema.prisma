@@ -1,0 +1,391 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // uses connection pooling
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AuthType {
+  GOOGLE
+  REOWN
+  RAINBOW_KIT
+  PRIVY
+}
+
+enum StorageProvider {
+  IPFS
+  R2
+  VERCEL_BLOB
+  SUPABASE_STORAGE
+}
+
+enum ContributionType {
+  DEVELOPMENT
+  CONTENT
+  CURATE
+  OTHER
+}
+
+enum Platform {
+  GITHUB
+  X
+  DISCORD
+  FARCASTER
+  OTHER
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model Site {
+  id              String          @id @default(uuid()) @db.Uuid
+  name            String          @default("") @db.VarChar(100)
+  description     String          @default("") @db.VarChar(500)
+  about           String          @default("") @db.Text
+  spaceId         String?         @db.VarChar(50)
+  logo            String?         @default("") @db.VarChar(2183)
+  font            String          @default("font-cal") @db.VarChar(50)
+  image           String?         @default("") @db.VarChar(2183)
+  email           String?         @unique @db.VarChar(255)
+  authSecret      String?         @unique @db.VarChar(255)
+  authType        AuthType        @default(RAINBOW_KIT)
+  authConfig      Json?
+  storageProvider StorageProvider @default(IPFS)
+  storageConfig   Json?
+  socials         Json?
+  config          Json?
+  themeName       String?         @db.VarChar(50)
+  themeConfig     Json?
+  memberCount     Int             @default(0) @db.Integer
+  postCount       Int             @default(0) @db.Integer
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  user            User            @relation(fields: [userId], references: [id])
+  userId          String          @db.Uuid
+  contributors    Contributor[]
+  channels        Channel[]
+  messages        Message[]
+  posts           Post[]
+  domains         Domain[]
+
+  @@index([userId])
+  @@map("site")
+}
+
+enum UserRole {
+  ADMIN
+  AUTHOR
+  READER
+}
+
+model User {
+  id            String        @id @default(uuid()) @db.Uuid
+  address       String?       @unique @db.VarChar(50)
+  fid           String?       @unique @db.VarChar(255)
+  googleId      String?       @unique @db.VarChar(255)
+  githubId      String?       @unique @db.VarChar(255)
+  github        Json? // github oauth info
+  google        Json? // google oauth info
+  farcaster     Json? // google oauth info
+  name          String?       @db.VarChar(255)
+  displayName   String?       @db.VarChar(255)
+  ensName       String?       @db.VarChar(255)
+  role          UserRole      @default(READER)
+  email         String?       @unique @db.VarChar(255)
+  emailVerified DateTime?
+  image         String?       @db.VarChar(2183)
+  cover         String?       @db.VarChar(2183)
+  bio           String        @default("") @db.VarChar(5000)
+  about         String        @default("")
+  subscriptions Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  posts         Post[]
+  comments      Comment[]
+  tags          Tag[]
+  accessTokens  AccessToken[]
+  contributors  Contributor[]
+  messages      Message[]
+  sites         Site[]
+
+  @@index([id])
+  @@index([address])
+  @@map("user")
+}
+
+model Node {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?
+  parentId   String?
+  databaseId String?
+  type       String
+  element    Json?
+  props      Json?
+  collapsed  Boolean  @default(false)
+  folded     Boolean  @default(true)
+  children   Json?
+  date       String?  @db.VarChar(20)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@map("node")
+}
+
+enum PostType {
+  ARTICLE
+  IMAGE
+  VIDEO
+  AUDIO
+  NFT
+  FIGMA
+  NOTE
+}
+
+enum GateType {
+  FREE
+  PAID
+  MEMBER_ONLY
+}
+
+enum PostStatus {
+  PUBLISHED
+  DRAFT
+  ARCHIVED
+}
+
+enum CommentStatus {
+  OPEN
+  CLOSED
+}
+
+model Post {
+  id            String        @id @default(uuid()) @db.Uuid
+  slug          String        @unique @default(uuid())
+  title         String        @default("") @db.VarChar(500)
+  description   String        @default("") @db.VarChar(1000)
+  content       String        @default("") @db.Text
+  cid           String        @default("") @db.VarChar(100)
+  nodeId        String?       @unique @db.Uuid
+  creationId    Int?          @db.Integer
+  type          PostType      @default(ARTICLE)
+  gateType      GateType      @default(FREE)
+  postStatus    PostStatus    @default(DRAFT)
+  commentStatus CommentStatus @default(OPEN)
+  commentCount  Int           @default(0) @db.Integer
+  image         String?       @default("") @db.VarChar(2183)
+  featured      Boolean       @default(false)
+  collectible   Boolean       @default(false)
+  publishedAt   DateTime?
+  archivedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  user          User          @relation(fields: [userId], references: [id])
+  userId        String        @db.Uuid
+
+  site     Site      @relation(fields: [siteId], references: [id])
+  siteId   String    @db.Uuid
+  comments Comment[]
+  postTags PostTag[]
+
+  @@index([userId])
+  @@index([postStatus])
+  @@index([type])
+  @@index([gateType])
+  @@index([userId, postStatus])
+  @@index([userId, type])
+  @@map("post")
+}
+
+model Comment {
+  id         String   @id @default(uuid()) @db.Uuid
+  content    String   @default("") @db.Text
+  // Points to the ID of the parent comment, null for the root comment
+  parentId   String?  @db.Uuid
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     String   @db.Uuid
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @db.Uuid
+  replyCount Int      @default(0) @db.Integer
+
+  parent  Comment?  @relation("ReplyRelation", fields: [parentId], references: [id]) // parent comments
+  replies Comment[] @relation("ReplyRelation") // sub comments
+
+  @@index([parentId, postId])
+  @@index([postId])
+  @@index([userId])
+  @@map("comment")
+}
+
+model Tag {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @default("") @db.VarChar(50)
+  color     String   @default("") @db.VarChar(50)
+  postCount Int      @default(0) @db.Integer
+  hidden    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User     User?     @relation(fields: [userId], references: [id])
+  userId   String?   @db.Uuid
+  postTags PostTag[]
+
+  @@index(name)
+  @@index(hidden)
+  @@map("tag")
+}
+
+model PostTag {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String   @db.Uuid
+  tag       Tag      @relation(fields: [tagId], references: [id])
+  tagId     String   @db.Uuid
+
+  @@index([postId])
+  @@map("post_tag")
+}
+
+model Asset {
+  id   String  @id @default(uuid()) @db.Uuid
+  url  String  @default("") @db.VarChar(2183)
+  cid  String  @default("") @db.VarChar(100)
+  type String? @db.VarChar(20)
+
+  @@map("asset")
+}
+
+model AccessToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  token      String    @default("") @db.VarChar(255)
+  alias      String?   @db.VarChar(50)
+  expiredAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedAt DateTime?
+  user       User      @relation(fields: [userId], references: [id])
+  userId     String    @db.Uuid
+
+  @@index([userId])
+  @@map("access_token")
+}
+
+model Contributor {
+  id        String   @id @default(uuid())
+  shares    Int      @default(0)
+  role      UserRole @default(READER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  site      Site     @relation(fields: [siteId], references: [id])
+  siteId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.Uuid
+
+  @@unique([userId, siteId])
+  @@index([siteId])
+  @@index([userId])
+  @@map("contributor")
+}
+
+enum ChannelType {
+  TEXT
+}
+
+model Channel {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String      @default("") @db.VarChar(50)
+  description String      @default("") @db.Text
+  type        ChannelType @default(TEXT)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  site        Site        @relation(fields: [siteId], references: [id])
+  siteId      String      @db.Uuid
+  messages    Message[]
+
+  @@index([siteId])
+  @@map("channel")
+}
+
+model Message {
+  id          String   @id @default(uuid()) @db.Uuid
+  // Sended = 1 Others sent successfully;SendFail = 2;Sending = 3;Undo = 4;AtAll = 5@All people;
+  // SelfSend = 6 Send successfully; PeerRead = 7 The other party has read;
+  // Reject = 8 // Backstage rejection (such as sensitive words, etc.)
+  status      Int
+  direction   Int // send 0; receive 1;
+  toId        String // Receive userId
+  contentType Int // TEXT = 1, IMAGE = 2
+  content     String   @default("") @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  site        Site     @relation(fields: [siteId], references: [id])
+  siteId      String   @db.Uuid
+  channel     Channel  @relation(fields: [channelId], references: [id])
+  channelId   String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @db.Uuid
+
+  @@index([channelId])
+  @@index([userId])
+  @@map("message")
+}
+
+model Cid {
+  id        String @id @default(uuid()) @db.Uuid
+  original  String @unique
+  lowercase String @unique
+
+  @@index([lowercase])
+  @@map("cid")
+}
+
+enum SubdomainType {
+  Custom
+  EnsName
+  FarcasterName
+  Address
+  UserId
+}
+
+model Domain {
+  id            String        @id @default(uuid()) @db.Uuid
+  domain        String        @unique
+  isSubdomain   Boolean       @default(true)
+  subdomainType SubdomainType @default(Custom)
+  disabled      Boolean       @default(false)
+  site          Site          @relation(fields: [siteId], references: [id])
+  siteId        String        @db.Uuid
+
+  @@map("domain")
+}
+
+model RewardRequest {
+  id              String           @id @default(uuid()) @db.Uuid
+  userAddress     String
+  type            ContributionType
+  platform        Platform?
+  content         String
+  status          RequestStatus    @default(PENDING)
+  tokenAmount     Float?           @default(0.0)
+  transactionHash String?
+  comments        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userAddress])
+  @@map("reward_request")
+}
