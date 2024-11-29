@@ -1,14 +1,12 @@
-"use client";
+'use client'
 
-import dynamic from "next/dynamic";
+import { FrameProvider } from '@/components/FrameApp/FrameProvider'
+import dynamic from 'next/dynamic'
 
-const Demo = dynamic(() => import("@/components/Demo"), {
+const FrameApp = dynamic(() => import('@/components/FrameApp/FrameApp'), {
   ssr: false,
-});
+})
 
 export default function App() {
-  return (
-      <Demo />
-  );
+  return <FrameApp />
 }
-

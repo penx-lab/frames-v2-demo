@@ -1,7 +1,7 @@
 'use client'
 
-import { getDefaultConfig } from '@rainbow-me/rainbowkit'
-import { publicActions } from 'viem'
+import { frameConnector } from '@/lib/connector'
+import { createConfig, http, WagmiProvider } from 'wagmi'
 import { base, baseSepolia } from 'wagmi/chains'
 import { NETWORK, NetworkNames, PROJECT_ID } from '../constants'
 
@@ -12,11 +12,10 @@ export function getChain() {
   return base
 }
 
-export const wagmiConfig = getDefaultConfig({
-  appName: 'PenX',
-  projectId: PROJECT_ID,
-  chains: [getChain()],
-  ssr: true,
+export const wagmiConfig = createConfig({
+  chains: [base],
+  transports: {
+    [base.id]: http(),
+  },
+  connectors: [frameConnector()],
 })
-
-export const publicClient = wagmiConfig.getClient().extend(publicActions)

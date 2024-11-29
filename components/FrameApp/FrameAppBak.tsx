@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { config } from '@/components/providers/WagmiProvider'
+import { config } from '@/components/FrameApp/WagmiProvider'
 import { Button } from '@/components/ui/button'
 import { truncateAddress } from '@/lib/truncateAddress'
 import sdk, { type FrameContext } from '@farcaster/frame-sdk'
@@ -13,7 +13,7 @@ import {
   useWaitForTransactionReceipt,
 } from 'wagmi'
 
-export default function Demo() {
+export default function FrameApp() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false)
   const [context, setContext] = useState<FrameContext>()
   const [isContextOpen, setIsContextOpen] = useState(false)

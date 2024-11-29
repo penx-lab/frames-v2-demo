@@ -55,6 +55,7 @@ model Site {
   logo            String?         @default("") @db.VarChar(2183)
   font            String          @default("font-cal") @db.VarChar(50)
   image           String?         @default("") @db.VarChar(2183)
+  symbolName      String?         @db.VarChar(50)
   email           String?         @unique @db.VarChar(255)
   authSecret      String?         @unique @db.VarChar(255)
   authType        AuthType        @default(RAINBOW_KIT)
